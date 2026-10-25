@@ -14,6 +14,7 @@ var hp: int = 100
 var max_hp: int = 100
 var score: int = 0
 var sector_index: int = 0
+var wave_index: int = 0
 var acquired_upgrades: Array[String] = []
 
 const BASE_MAX_HP := 100
@@ -45,6 +46,7 @@ func reset() -> void:
 	hp = max_hp
 	score = 0
 	sector_index = 0
+	wave_index = 0
 	acquired_upgrades.clear()
 	# M1: reset XP/level
 	level = 1
@@ -67,3 +69,17 @@ func gain_xp(amount: int) -> void:
 		level += 1
 		xp_to_next = int(XP_BASE * pow(XP_GROWTH, level - 1))
 		EventBus.level_up.emit(level)
+
+func start_wave(wave: int) -> void:
+	wave_index = wave
+	EventBus.wave_started.emit(wave)
+
+func get_wave_enemy_count() -> int:
+	# Gentle growth: 3, 4, 5 ... capped for the Phase 1 prototype.
+	return mini(2 + wave_index, 12)
+
+func get_wave_enemy_hp() -> int:
+	return 3 + maxi(wave_index - 1, 0)
+
+func get_wave_enemy_xp() -> int:
+	return 25 + (wave_index - 1) * 5

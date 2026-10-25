@@ -5,6 +5,17 @@ All notable changes to Nebula Drift will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] — 2026-10-26
+
+### Added — M1: Wave System
+
+- **Wave progression**: waves start with 3 enemies and grow to 12, with a 1.5-second transition between cleared waves
+- **Difficulty scaling**: enemy HP increases by 1 per wave; XP reward increases by 5 per wave
+- **Wave signals**: `wave_started` and `wave_cleared` added to EventBus
+- **RunState wave data**: `wave_index`, `start_wave()`, and deterministic enemy count/HP/XP helpers
+- **Enemy tracking**: Main tracks all active enemies and advances only after the entire wave is cleared
+- **HUD XP display** remains active across wave transitions
+
 ## [0.2.0] — 2026-10-26
 
 ### Added — M1: XP, Upgrades & Leveling
