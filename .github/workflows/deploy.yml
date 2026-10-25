@@ -48,8 +48,14 @@ jobs:
           ls "${TEMPLATES_DIR}/4.3.stable" | head -5
 
       - name: Import project assets (generates .godot cache)
-        run: godot --headless --import
-        # Non-zero exit on failure aborts the job automatically.
+        run: |
+          # A cold checkout has no .godot/ cache; the very first import
+          # can abort on load-order edge cases. Retry once — the retry
+          # still fails the job if the import is genuinely broken.
+          godot --headless --import || {
+            echo "::warning::first --import attempt failed, retrying"
+            godot --headless --import
+          }
 
       - name: Export Web release
         run: godot --headless --export-release "Web" build/web/index.html

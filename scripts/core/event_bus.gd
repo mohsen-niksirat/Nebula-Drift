@@ -13,9 +13,9 @@ extends Node
 ##   enemy_hit_by_bullet(bullet: Node)   — enemy registered a bullet hit
 ##   player_shoot(position: Vector2, dir: Vector2) — player fired
 ##   sector_cleared()                    — all enemies defeated in sector
-##   upgrade_picked(definition: UpgradeDefinition)
-
-const UpgradeDefinition = preload("res://scripts/upgrades/upgrade_definition.gd")
+##   upgrade_picked(definition)          — an upgrade was chosen (M2)
+##     (definition is an UpgradeDefinition resource; left untyped to
+##      keep the parse-time dependency graph acyclic)
 
 signal enemy_spawned(enemy: Node)
 signal enemy_died(enemy: Node)
@@ -25,4 +25,4 @@ signal player_died()
 signal enemy_hit_by_bullet(bullet: Node)
 signal player_shoot(position: Vector2, dir: Vector2)
 signal sector_cleared()
-signal upgrade_picked(definition: UpgradeDefinition)
+signal upgrade_picked(definition)

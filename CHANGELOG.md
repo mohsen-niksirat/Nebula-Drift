@@ -5,6 +5,30 @@ All notable changes to Nebula Drift will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.5] — 2026-10-25
+
+### Fixed
+
+- **Headless import crash (signal 11 / exit 134)** — parse errors were
+  gone but `godot --headless --import` still segfaulted at startup:
+  - Root cause: a parse-time resource load cycle. `object_pool.gd`
+    (an autoload) used `const BULLET_SCENE := preload(...)`, which loads
+    `Bullet.tscn` -> `bullet.gd` -> resolves the `ObjectPool` autoload
+    identifier -> re-enters the still-loading `object_pool.gd`.
+    Infinite recursion during script loading -> stack overflow -> SIGSEGV.
+  - Fix: the bullet scene is now loaded lazily with `load()` in
+    `ObjectPool._ready()` (after all scripts are compiled), breaking
+    the cycle.
+  - Second, transitive cycle removed: `event_bus.gd` preloaded
+    `upgrade_definition.gd`, whose `apply_to(run_state: RunState)`
+    annotation pulled in `run_state.gd`, which references `EventBus`
+    — re-entering `event_bus.gd`. `apply_to` is now intentionally
+    untyped and the `upgrade_picked` signal parameter is untyped;
+    event_bus.gd has no preload dependencies at all.
+  - Workflow: the `--import` step now retries once if the first attempt
+    aborts (cold checkouts have no `.godot/` cache); a genuine failure
+    still fails the job.
+
 ## [0.1.4] — 2026-10-25
 
 ### Fixed

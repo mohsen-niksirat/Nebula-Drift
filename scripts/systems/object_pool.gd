@@ -6,12 +6,12 @@ extends Node
 ## pool (Phase 0 requirement): bullets are acquired via spawn_bullet()
 ## and released back via release_bullet() — never queue_free()'d.
 ##
-## Usage:
-##     var b = ObjectPool.spawn_bullet(pos, dir)
-##     # bullet returns itself via release_bullet() on hit / timeout
+## NOTE: the bullet scene is loaded lazily in _ready(), NOT via const
+## preload — a parse-time preload here would create a load cycle
+## (ObjectPool -> Bullet.tscn -> bullet.gd -> ObjectPool) that crashes
+## headless imports with a stack overflow.
 
-const BULLET_SCENE := preload("res://scenes/bullets/Bullet.tscn")
-
+var _bullet_scene: PackedScene
 var _available: Array[Node2D] = []
 var _active: Array[Node2D] = []
 var _bullet_container: Node = null
@@ -20,6 +20,7 @@ signal spawned(instance: Node)
 signal returned(instance: Node)
 
 func _ready() -> void:
+	_bullet_scene = load("res://scenes/bullets/Bullet.tscn")
 	_bullet_container = Node2D.new()
 	_bullet_container.name = "BulletPool"
 	add_child(_bullet_container)
@@ -32,7 +33,7 @@ func spawn_bullet(pos: Vector2, dir: Vector2, speed: float = 420.0) -> Node2D:
 		bullet.set_physics_process(true)
 		bullet.set_deferred("monitoring", true)
 	else:
-		bullet = BULLET_SCENE.instantiate()
+		bullet = _bullet_scene.instantiate()
 		_bullet_container.add_child(bullet)
 	bullet.global_position = pos
 	if bullet.has_method("launch"):

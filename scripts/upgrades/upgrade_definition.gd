@@ -22,7 +22,10 @@ extends Resource
 # Stored as a Callable so the registry can assign behavior per-instance.
 var apply: Callable = Callable()
 
-func apply_to(run_state: RunState) -> void:
-	"""Invoke the stored apply callable (safe no-op if unset)."""
+func apply_to(run_state) -> void:
+	"""Invoke the stored apply callable (safe no-op if unset).
+	Intentionally untyped: a RunState type annotation here would create
+	a parse-time dependency cycle (event_bus -> this -> run_state ->
+	event_bus) that can crash headless imports."""
 	if apply.is_valid():
 		apply.call(run_state)
