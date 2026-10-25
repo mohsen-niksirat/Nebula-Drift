@@ -5,6 +5,12 @@ All notable changes to Nebula Drift will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.9] — 2026-10-25
+
+### Fixed
+
+- Web export now creates `build/web/` before invoking `--export-release`; Godot 4.4 does not auto-create the target directory, causing "Target folder does not exist" on cold checkouts.
+
 ## [0.1.8] — 2026-10-25
 
 ### Fixed
