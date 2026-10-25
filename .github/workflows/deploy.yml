@@ -59,7 +59,9 @@ jobs:
       - name: Export Web release
         run: |
           mkdir -p build/web
-          godot --headless --export-release "Web" build/web/index.html
+          # Export without threading to avoid a known Godot 4.4 crash in
+          # savepack during scene resource packing (signal 11 / exit 134).
+          godot --headless --export-release "Web" build/web/index.html --export-option export_threads=off
         # Fails the job (and blocks deploy) if the export prints errors.
 
       - name: Upload Pages artifact

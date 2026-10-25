@@ -5,6 +5,12 @@ All notable changes to Nebula Drift will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.10] — 2026-10-25
+
+### Fixed
+
+- Export crashes during `savepack` step 2 (Bullet.tscn) — Godot 4.4's threaded scene serializer segfaults on certain Area2D/SubResource combos. Workaround: disable export threading via `--export-option export_threads=off`.
+
 ## [0.1.9] — 2026-10-25
 
 ### Fixed
