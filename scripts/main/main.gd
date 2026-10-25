@@ -35,12 +35,11 @@ func _build_scenes() -> void:
 func _on_state_changed(new_state: GameManager.State, _old_state: GameManager.State) -> void:
 	match new_state:
 		GameManager.State.SECTOR:
-			get_tree().paused = false
 			_enter_sector()
 		GameManager.State.UPGRADE_PICK:
-			get_tree().paused = true
+			# No pause — UI stays interactive, enemies stop via state guard
+			pass
 		GameManager.State.GAME_OVER:
-			get_tree().paused = true
 			_show_game_over()
 
 func _enter_sector() -> void:

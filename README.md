@@ -38,7 +38,7 @@ HP, score, and a game-over + retry screen.
 
 After the CI workflow succeeds, the game is playable at:
 
-**https://mohsen-niksirat.github.io/nebula-drift/**
+**https://mohsen-niksirat.github.io/Nebula-Drift/**
 
 ### CI
 

@@ -47,6 +47,11 @@ func _calc_spawn_position() -> Vector2:
 	return Vector2(640, 360) + Vector2(0, -dist).rotated(angle)
 
 func _physics_process(delta: float) -> void:
+	# Skip movement during UPGRADE_PICK — enemies freeze visually but
+	# the game tree remains unpaused for UI interaction.
+	if GameManager.current_state == GameManager.State.UPGRADE_PICK:
+		velocity = Vector2.ZERO
+		return
 	# Drift toward the player (not the mouse).
 	_player = _find_player()
 	if _player != null and is_instance_valid(_player):

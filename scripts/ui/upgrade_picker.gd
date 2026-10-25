@@ -1,9 +1,10 @@
 extends CanvasLayer
 ## UpgradePicker — shown when the player levels up.
 ##
-## Purpose: pauses gameplay (GameManager.UPGRADE_PICK) and presents
-## 3 upgrade cards. Selecting one applies it to RunState and resumes
-## the SECTOR state. Registered in the "upgrade_picker" group.
+## Purpose: presents 3 upgrade cards when the player levels up.
+## Selecting one applies it to RunState and resumes the SECTOR state.
+## The game does NOT pause — enemies stop via state guards instead.
+## Registered in the "upgrade_picker" group.
 
 signal picked(definition)
 
@@ -24,9 +25,6 @@ func _on_level_up(level: int) -> void:
 	_current_level = level
 	_options = UpgradeRegistry.pick_three()
 	print("[UpgradePicker] level %d: showing %d options" % [level, _options.size()])
-	if _options.is_empty():
-		# No upgrades left — resume immediately
-		return
 	_level_label.text = "LEVEL %d" % level
 	_show_options()
 
@@ -39,12 +37,18 @@ func _show_options() -> void:
 		var def = _options[i]
 		var card = _create_card(def, i)
 		_cards_container.add_child(card)
-	# Make the overlay visible before pausing physics so the browser
-	# receives the input and can render the cards immediately.
+	# Failsafe: add SKIP button if options are somehow empty
+	if _options.is_empty():
+		var skip_btn := Button.new()
+		skip_btn.text = "SKIP"
+		skip_btn.pressed.connect(_on_skip_pressed)
+		_cards_container.add_child(skip_btn)
+		print("[UpgradePicker] WARNING: no options, added SKIP button")
+	# Make the overlay visible — game does NOT pause; enemies guard their own movement.
 	_panel.visible = true
 	print("[UpgradePicker] panel visible: %s at position %s" % [_panel.visible, _panel.position])
 	GameManager.enter_state(GameManager.State.UPGRADE_PICK)
-	print("[UpgradePicker] state: %s, paused: %s" % [GameManager.State.keys()[GameManager.current_state], get_tree().paused])
+	print("[UpgradePicker] state: %s (no pause)" % GameManager.State.keys()[GameManager.current_state])
 
 func _create_card(def, index: int) -> Button:
 	var btn := Button.new()
@@ -105,4 +109,11 @@ func _on_card_pressed(index: int) -> void:
 	_panel.visible = false
 	_options.clear()
 	GameManager.enter_state(GameManager.State.SECTOR)
-	print("[UpgradePicker] resumed: state=%s, paused=%s" % [GameManager.State.keys()[GameManager.current_state], get_tree().paused])
+	print("[UpgradePicker] resumed: state=%s" % GameManager.State.keys()[GameManager.current_state])
+
+func _on_skip_pressed() -> void:
+	# Failsafe: dismiss picker without applying any upgrade
+	print("[UpgradePicker] skipped")
+	_panel.visible = false
+	_options.clear()
+	GameManager.enter_state(GameManager.State.SECTOR)

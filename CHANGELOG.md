@@ -5,6 +5,21 @@ All notable changes to Nebula Drift will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.5] — 2026-10-26
+
+### Fixed — Phase 1.1 Freeze Fix (Complete)
+
+- **Removed tree pause entirely**: `get_tree().paused` is no longer used. UPGRADE_PICK is now a state flag that enemies and player check via `GameManager.current_state`, not a physics pause.
+- **Enemy state guard**: `enemy_base.gd` skips movement when `GameManager.current_state == UPGRADE_PICK` — enemies freeze visually but the tree stays live for UI input.
+- **Player state guard**: `player.gd` skips movement/shooting when not in `SECTOR` — already present, now the *only* freeze mechanism.
+- **SKIP failsafe**: if `_options` is empty, a SKIP button appears so the game can never soft-lock.
+- **README link**: fixed GitHub Pages URL to `Nebula-Drift` (correct case).
+- **Deleted stale prompt files**: removed `nebula-drift-phase*.txt` scratch files from repo.
+
+### Architecture change
+
+`UPGRADE_PICK` is now a **state flag**, not a physics pause. This eliminates the browser-input freeze entirely — the tree never pauses, so UI buttons always receive clicks.
+
 ## [0.2.4] — 2026-10-26
 
 ### Fixed — Phase 1.1 Freeze Fix
