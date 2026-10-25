@@ -92,26 +92,31 @@ func pick_random(rarity: int = -1) -> UpgradeDefinition:
 	return pool.pick_random()
 
 func pick_three() -> Array[UpgradeDefinition]:
-	# Weighted random: 50% common, 30% uncommon, 15% rare, 5% legendary
-	var pool: Array[UpgradeDefinition] = []
-	var weights = [0.5, 0.3, 0.15, 0.05]
-	for rarity in Rarity.values():
-		var options = get_by_rarity(rarity)
-		for def in options:
-			pool.append({"def": def, "weight": weights[rarity]})
+	# Weighted candidate list: common 50%, uncommon 30%, rare 15%,
+	# legendary 5%. Repeated references encode the weights without using
+	# untyped dictionaries, which is safer in the Web export.
+	var weighted: Array[UpgradeDefinition] = []
+	for def in get_by_rarity(Rarity.COMMON):
+		weighted.append(def)
+		weighted.append(def)
+		weighted.append(def)
+		weighted.append(def)
+		weighted.append(def)
+	for def in get_by_rarity(Rarity.UNCOMMON):
+		weighted.append(def)
+		weighted.append(def)
+		weighted.append(def)
+	for def in get_by_rarity(Rarity.RARE):
+		weighted.append(def)
+		weighted.append(def)
+	for def in get_by_rarity(Rarity.LEGENDARY):
+		weighted.append(def)
+
 	var result: Array[UpgradeDefinition] = []
-	for i in 3:
-		if pool.is_empty():
-			break
-		var total = 0.0
-		for item in pool:
-			total += item.weight
-		var roll = randf() * total
-		var cumulative = 0.0
-		for item in pool:
-			cumulative += item.weight
-			if roll <= cumulative:
-				result.append(item.def)
-				pool.erase(item)
-				break
+	var attempts := 0
+	while result.size() < 3 and not weighted.is_empty() and attempts < 30:
+		attempts += 1
+		var candidate: UpgradeDefinition = weighted.pick_random()
+		if not result.has(candidate):
+			result.append(candidate)
 	return result

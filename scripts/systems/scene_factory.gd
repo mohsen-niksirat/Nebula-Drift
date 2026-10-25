@@ -156,6 +156,7 @@ class UpgradePicker:
 		var picker := CanvasLayer.new()
 		picker.name = "UpgradePicker"
 		picker.layer = 10
+		picker.process_mode = Node.PROCESS_MODE_ALWAYS
 		picker.set_script(preload("res://scripts/ui/upgrade_picker.gd"))
 
 		var panel := PanelContainer.new()

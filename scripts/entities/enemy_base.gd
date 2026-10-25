@@ -33,9 +33,10 @@ func _ready() -> void:
 	# get their hitbox added by the enemy spawner before _ready)
 	if has_node("Hitbox"):
 		$Hitbox.body_entered.connect(_on_body_entered)
-	# Seeded spawn: the spawn position is computed from RunState.run_seed so
-	# identical runs produce identical enemy spawn positions.
-	global_position = _calc_spawn_position()
+	# Main assigns wave positions. Keep the seeded fallback for enemies
+	# created by other systems.
+	if global_position == Vector2.ZERO:
+		global_position = _calc_spawn_position()
 
 func _calc_spawn_position() -> Vector2:
 	# Spawn on a circle around the arena center (radius 300-450 px).

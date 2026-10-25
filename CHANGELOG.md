@@ -5,6 +5,15 @@ All notable changes to Nebula Drift will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] — 2026-10-26
+
+### Fixed
+
+- **Wave spawn placement**: all enemies now use an evenly distributed, seed-offset ring around the player; spawning no longer depends on the partially-filled enemy array, which previously made the wave appear to come from one direction.
+- **Upgrade picker in Web**: picker uses `PROCESS_MODE_ALWAYS`, displays its panel before pausing the tree, and logs the generated option count. This ensures the overlay remains interactive after `UPGRADE_PICK` pauses gameplay.
+- **Browser controls**: player movement and firing now use the project input actions instead of polling keys/mouse directly.
+- **Upgrade selection**: weighted choices no longer use untyped dictionaries, reducing Web-export/runtime compatibility issues.
+
 ## [0.2.1] — 2026-10-26
 
 ### Added — M1: Wave System

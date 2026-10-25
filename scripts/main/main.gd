@@ -68,7 +68,7 @@ func _spawn_wave_enemies() -> void:
 	_enemies.clear()
 	var count := RunState.get_wave_enemy_count()
 	for i in count:
-		_spawn_enemy(i)
+		_spawn_enemy(i, count)
 	print("[Wave] Started wave %d with %d enemies" % [RunState.wave_index, count])
 
 func _spawn_player() -> void:
@@ -76,12 +76,15 @@ func _spawn_player() -> void:
 	_player.position = Vector2(640, 360)
 	add_child(_player)
 
-func _spawn_enemy(index: int = 0) -> void:
+func _spawn_enemy(index: int = 0, wave_count: int = 1) -> void:
 	var enemy := SceneFactory.Enemy.create()
 	enemy.max_hp = RunState.get_wave_enemy_hp()
 	enemy.xp_value = RunState.get_wave_enemy_xp()
-	# Spread the wave around the arena deterministically.
-	var angle := TAU * float(index) / float(maxi(_enemies.size() + 1, 1))
+	# Spread the wave evenly around the player, with a seed-based offset.
+	# Do not rely on _enemies.size() while spawning: each new enemy would
+	# change the angle and make the apparent spawn direction deterministic.
+	var angle_offset := fmod(float(RunState.run_seed) * 0.017, TAU)
+	var angle := angle_offset + TAU * float(index) / float(maxi(wave_count, 1))
 	enemy.position = Vector2(640, 360) + Vector2(0, -360).rotated(angle)
 	add_child(enemy)
 	_enemies.append(enemy)

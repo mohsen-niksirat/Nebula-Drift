@@ -30,17 +30,10 @@ func _physics_process(delta: float) -> void:
 	if _invuln > 0.0:
 		_invuln -= delta
 
-func _handle_movement(delta: float) -> void:
-	var input_dir = Vector2.ZERO
-	if Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP):
-		input_dir.y -= 1
-	if Input.is_key_pressed(KEY_S) or Input.is_key_pressed(KEY_DOWN):
-		input_dir.y += 1
-	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
-		input_dir.x -= 1
-	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
-		input_dir.x += 1
-	input_dir = input_dir.normalized()
+func _handle_movement(_delta: float) -> void:
+	# Use the project input map so keyboard controls work consistently in
+	# native builds and browser exports (WASD + arrow keys).
+	var input_dir := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	velocity = input_dir * _speed
 	move_and_slide()
 
@@ -50,7 +43,7 @@ func _handle_shooting(delta: float) -> void:
 		_fire()
 
 func _is_shooting() -> bool:
-	return Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or Input.is_key_pressed(KEY_SPACE)
+	return Input.is_action_pressed("shoot")
 
 func _fire() -> void:
 	# Aim toward mouse cursor.

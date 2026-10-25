@@ -23,6 +23,7 @@ func _ready() -> void:
 func _on_level_up(level: int) -> void:
 	_current_level = level
 	_options = UpgradeRegistry.pick_three()
+	print("[UpgradePicker] level %d: showing %d options" % [level, _options.size()])
 	if _options.is_empty():
 		# No upgrades left — resume immediately
 		return
@@ -38,9 +39,10 @@ func _show_options() -> void:
 		var def = _options[i]
 		var card = _create_card(def, i)
 		_cards_container.add_child(card)
-	# Enter UPGRADE_PICK state (pauses physics)
-	GameManager.enter_state(GameManager.State.UPGRADE_PICK)
+	# Make the overlay visible before pausing physics so the browser
+	# receives the input and can render the cards immediately.
 	_panel.visible = true
+	GameManager.enter_state(GameManager.State.UPGRADE_PICK)
 
 func _create_card(def, index: int) -> Button:
 	var btn := Button.new()
