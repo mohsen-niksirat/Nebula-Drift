@@ -5,6 +5,41 @@ All notable changes to Nebula Drift will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] — 2026-10-25
+
+### Added
+
+- **Phase 0.9: Web export + GitHub Pages auto-deploy**
+  - `export_presets.cfg`: single "Web" preset (Godot 4.3), export path
+    `build/web/index.html`, adaptive canvas resize, thread support OFF
+    (GitHub Pages cannot send the COOP/COEP headers SharedArrayBuffer
+    requires), no debug export.
+  - `.github/workflows/deploy.yml`: on every push to `main` (plus manual
+    `workflow_dispatch`), downloads Godot **4.3-stable** headless from
+    godotengine/godot-builds, installs the matching export templates
+    (tpz unpacked into `~/.local/share/godot/export_templates/4.3.stable/`),
+    runs `godot --headless --import` (generates the `.godot/` import
+    cache), then `godot --headless --export-release "Web"`, uploads the
+    Pages artifact and deploys via `actions/upload-pages-artifact@v3` +
+    `actions/deploy-pages@v4` (permissions: `pages: write`,
+    `id-token: write`; concurrency group `pages`). Any export error
+    fails the job and blocks deploy.
+  - README: "Play in browser" section, CI note, updated phase table,
+    and the documented one-time manual step (Settings → Pages → Source
+    = GitHub Actions).
+  - `.gitignore`: removed `export_presets.cfg` (the preset must be
+    committed) and the `*.import` rule (Godot 4 sidecar files are
+    project metadata); added `build/` so export artifacts are never
+    committed.
+
+### Notes
+
+- Honest status: the workflow YAML was linted locally (Python
+  `yaml.safe_load`) and the preset structure was sanity-parsed, but the
+  live site has NOT been verified — the first real run happens on the
+  next push, and the user must enable Pages (Source = GitHub Actions)
+  and check https://mohsen-niksirat.github.io/nebula-drift/.
+
 ## [0.1.2] — 2026-10-25
 
 ### Fixed

@@ -34,6 +34,23 @@ Requirements: **Godot 4.3 or newer** (GDScript only, no C#, no editor plugins).
 Phase 0 ships a minimal smoke test: one drifting enemy, pooled bullets,
 HP, score, and a game-over + retry screen.
 
+## Play in browser
+
+After the CI workflow succeeds, the game is playable at:
+
+**https://mohsen-niksirat.github.io/nebula-drift/**
+
+### CI
+
+Every push to `main` triggers [.github/workflows/deploy.yml](.github/workflows/deploy.yml):
+it downloads Godot **4.3-stable** headless, installs the matching export
+templates, runs `--import` then `--export-release "Web"`, and deploys
+`build/web/` to GitHub Pages. If the export fails, the deploy is blocked.
+
+**One-time manual step (not automated):** in the GitHub repo, set
+**Settings → Pages → Source = "GitHub Actions"**. Until this is set,
+deploys will not publish.
+
 ## Architecture (Phase 0)
 
 - **GameManager** — top-level state machine: `MENU / SECTOR / UPGRADE_PICK / GAME_OVER`.
@@ -85,6 +102,7 @@ nebula-drift/
 | Phase | Description                                   | Status   |
 |-------|-----------------------------------------------|----------|
 | P0    | Base architecture + smoke test                | ✅ done (code-complete; editor verification pending) |
+| P0.9  | Web export + GitHub Pages auto-deploy         | ✅ done (preset + workflow committed, YAML lint passed; live-site check pending user test) |
 | M1    | Core movement / shooting / enemies            | ⬜ todo   |
 | M2    | Upgrade picks between sectors                 | ⬜ todo   |
 | M3    | Enemy variety + boss                          | ⬜ todo   |

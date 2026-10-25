@@ -3,8 +3,9 @@ nebula-drift-phase*.txt
 
 # Godot
 .godot/
-*.import
-export_presets.cfg
+
+# Build artifacts (created by CI / local exports — never commit)
+build/
 
 # OS
 .DS_Store
