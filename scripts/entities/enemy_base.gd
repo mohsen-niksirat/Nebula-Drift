@@ -20,15 +20,19 @@ const Rng = preload("res://scripts/systems/rng.gd")
 @export var max_hp: int = 3
 @export var drift_speed: float = 60.0
 @export var contact_damage: int = 10
+@export var xp_value: int = 25  # M1: XP dropped on death
 
 var _hp: int = 0
 var _player: Node2D = null
+var _spawned_via_factory := false
 
 func _ready() -> void:
 	add_to_group(GROUP_NAME)
 	_hp = max_hp
-	# Contact damage: the Hitbox Area2D detects the player body.
-	$Hitbox.body_entered.connect(_on_body_entered)
+	# M1: only connect Hitbox if the child exists (factory-created enemies
+	# get their hitbox added by the enemy spawner before _ready)
+	if has_node("Hitbox"):
+		$Hitbox.body_entered.connect(_on_body_entered)
 	# Seeded spawn: the spawn position is computed from RunState.run_seed so
 	# identical runs produce identical enemy spawn positions.
 	global_position = _calc_spawn_position()
@@ -64,6 +68,8 @@ func take_hit(damage: int) -> void:
 func _die() -> void:
 	died.emit(self)
 	EventBus.enemy_died.emit(self)
+	# M1: grant XP on kill
+	RunState.gain_xp(xp_value)
 	queue_free()
 
 func get_current_hp() -> int:

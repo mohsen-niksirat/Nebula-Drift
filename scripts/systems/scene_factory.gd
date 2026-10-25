@@ -102,6 +102,13 @@ class Hud:
 		score_label.text = "SCORE: 0"
 		info.add_child(score_label)
 
+		# M1: XP / level display
+		var xp_label := Label.new()
+		xp_label.name = "XPLabel"
+		xp_label.layout_mode = 2
+		xp_label.text = "LV 1 | XP 0/100"
+		info.add_child(xp_label)
+
 		var game_over := CenterContainer.new()
 		game_over.name = "GameOver"
 		game_over.layout_mode = 1
@@ -143,3 +150,43 @@ class Hud:
 		vbox.add_child(restart_btn)
 
 		return hud
+
+class UpgradePicker:
+	static func create() -> CanvasLayer:
+		var picker := CanvasLayer.new()
+		picker.name = "UpgradePicker"
+		picker.layer = 10
+		picker.set_script(preload("res://scripts/ui/upgrade_picker.gd"))
+
+		var panel := PanelContainer.new()
+		panel.name = "Panel"
+		panel.set_anchors_preset(Control.PRESET_CENTER)
+		panel.size = Vector2(700, 200)
+		panel.position = Vector2(290, 260)
+		picker.add_child(panel)
+
+		var vbox := VBoxContainer.new()
+		vbox.name = "VBox"
+		vbox.add_theme_constant_override("separation", 12)
+		panel.add_child(vbox)
+
+		var title := Label.new()
+		title.name = "Title"
+		title.text = "CHOOSE AN UPGRADE"
+		title.horizontal_alignment = 1
+		title.add_theme_font_size_override("font_size", 24)
+		vbox.add_child(title)
+
+		var level_label := Label.new()
+		level_label.name = "Level"
+		level_label.text = "LEVEL 1"
+		level_label.horizontal_alignment = 1
+		vbox.add_child(level_label)
+
+		var cards := HBoxContainer.new()
+		cards.name = "Cards"
+		cards.alignment = BoxContainer.ALIGNMENT_CENTER
+		cards.add_theme_constant_override("separation", 16)
+		vbox.add_child(cards)
+
+		return picker

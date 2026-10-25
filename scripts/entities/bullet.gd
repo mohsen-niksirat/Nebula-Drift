@@ -3,9 +3,7 @@ extends Area2D
 ##
 ## Purpose: travels along its velocity, reports hits via EventBus, and
 ## is RELEASED back to the ObjectPool on despawn (never queue_free'd).
-##
-## Signals:
-##   hit(enemy: Node) — fired when this bullet collides with an enemy.
+## M1: damage is set by player.gd after spawn (bullet_damage upgrade).
 
 signal hit(enemy: Node)
 
@@ -22,6 +20,9 @@ func launch(dir: Vector2, speed: float) -> void:
 	_timer = 0.0
 	visible = true
 	set_physics_process(true)
+
+func set_damage(amount: int) -> void:
+	damage = amount
 
 func _physics_process(delta: float) -> void:
 	_timer += delta

@@ -5,6 +5,7 @@ extends CharacterBody2D
 ## Shoots toward the mouse cursor; bullets are spawned via ObjectPool.
 ## Registers in the "player" group so enemies can find it, and takes
 ## contact damage via RunState.
+## M1: reads multi_shot and bullet_damage upgrades from RunState.
 
 const CONTACT_INVULN_TIME = 0.6
 
@@ -12,11 +13,16 @@ var _speed: float = 200.0
 var _fire_rate: float = 0.5
 var _cooldown: float = 0.0
 var _invuln: float = 0.0
+var _has_multi_shot: bool = false
+var _bullet_damage: int = 1
 
 func _ready() -> void:
 	add_to_group("player")
 	_speed = RunState.movement_speed
 	_fire_rate = RunState.fire_rate
+	# M1: cache upgrade flags so we don't check the array every shot
+	_has_multi_shot = RunState.acquired_upgrades.has("multi_shot")
+	_bullet_damage = 2 if RunState.acquired_upgrades.has("bullet_damage") else 1
 
 func _physics_process(delta: float) -> void:
 	_handle_movement(delta)
@@ -52,9 +58,20 @@ func _fire() -> void:
 	var dir := (mouse - global_position).normalized()
 	if dir == Vector2.ZERO:
 		dir = Vector2.RIGHT
-	# Spawn offset slightly ahead of the ship.
 	var spawn_pos := global_position + dir * 28.0
-	ObjectPool.spawn_bullet(spawn_pos, dir)
+
+	# M1: multi_shot fires 2 bullets with slight spread
+	var directions := [dir]
+	if _has_multi_shot:
+		var spread := 0.15  # ~8.6 degrees
+		directions = [dir.rotated(-spread), dir.rotated(spread)]
+
+	for shot_dir in directions:
+		var bullet = ObjectPool.spawn_bullet(spawn_pos, shot_dir)
+		# M1: apply damage upgrade via method (safer than property access)
+		if bullet.has_method("set_damage"):
+			bullet.set_damage(_bullet_damage)
+
 	EventBus.player_shoot.emit(spawn_pos, dir)
 	_cooldown = _fire_rate
 

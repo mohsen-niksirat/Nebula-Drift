@@ -24,6 +24,13 @@ const BASE_FIRE_RATE := 0.5
 var movement_speed: float = 200.0
 var fire_rate: float = 0.5
 
+# M1: XP / level progression
+var level: int = 1
+var xp: int = 0
+var xp_to_next: int = 100
+const XP_BASE := 100
+const XP_GROWTH := 1.35
+
 func _ready() -> void:
 	rng = Rng.new(run_seed)
 	print("[RunState] run seed =", run_seed)
@@ -39,6 +46,10 @@ func reset() -> void:
 	score = 0
 	sector_index = 0
 	acquired_upgrades.clear()
+	# M1: reset XP/level
+	level = 1
+	xp = 0
+	xp_to_next = XP_BASE
 	rng = Rng.new(run_seed)
 
 func take_damage(amount: int) -> void:
@@ -46,3 +57,13 @@ func take_damage(amount: int) -> void:
 	EventBus.player_damaged.emit(amount, hp)
 	if hp <= 0:
 		EventBus.player_died.emit()
+
+# --- M1: XP / level progression ---
+func gain_xp(amount: int) -> void:
+	xp += amount
+	EventBus.xp_gained.emit(amount)
+	while xp >= xp_to_next:
+		xp -= xp_to_next
+		level += 1
+		xp_to_next = int(XP_BASE * pow(XP_GROWTH, level - 1))
+		EventBus.level_up.emit(level)

@@ -13,6 +13,8 @@ extends Node
 ##   enemy_hit_by_bullet(bullet: Node)   — enemy registered a bullet hit
 ##   player_shoot(position: Vector2, dir: Vector2) — player fired
 ##   sector_cleared()                    — all enemies defeated in sector
+##   xp_gained(amount: int)              — player picked up XP
+##   level_up(level: int)                — player leveled up; shows upgrade UI
 ##   upgrade_picked(definition)          — an upgrade was chosen (M2)
 ##     (definition is an UpgradeDefinition resource; left untyped to
 ##      keep the parse-time dependency graph acyclic)
@@ -25,4 +27,6 @@ signal player_died()
 signal enemy_hit_by_bullet(bullet: Node)
 signal player_shoot(position: Vector2, dir: Vector2)
 signal sector_cleared()
+signal xp_gained(amount: int)
+signal level_up(level: int)
 signal upgrade_picked(definition)

@@ -7,7 +7,7 @@ extends Node
 ## and released back via release_bullet() — never queue_free()'d.
 ##
 ## NOTE: bullets are created programmatically in code (not via a PackedScene)
-## to avoid a Godot 4.4 savepack crash on Bullet.tscn's SubResource shape.
+## to avoid a Godot 4.4 savepack crash on .tscn files with SubResources.
 
 const BULLET_SPEED := 420.0
 

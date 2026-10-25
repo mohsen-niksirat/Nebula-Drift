@@ -5,6 +5,23 @@ All notable changes to Nebula Drift will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] — 2026-10-26
+
+### Added — M1: XP, Upgrades & Leveling
+
+- **XP progression**: `RunState.level`, `xp`, `xp_to_next` with 35% growth curve (`XP_BASE=100`)
+- **UpgradePicker UI**: CanvasLayer with 3 upgrade cards, shown on `level_up` signal; GameManager pauses physics in UPGRADE_PICK
+- **5 upgrades**: `extra_speed`, `fire_rate`, `extra_hp`, `multi_shot`, `bullet_damage` — weighted random by rarity (50/30/15/5)
+- **New EventBus signals**: `xp_gained`, `level_up`, `upgrade_picked`
+- **Player upgrades**: `multi_shot` fires 2 bullets with ±8.6° spread; `bullet_damage` doubles hit damage
+- **Enemy XP drops**: `xp_value=25` per kill, granted via `RunState.gain_xp()`
+- **HUD XP display**: shows `LV N | XP current/next` alongside hull/score
+
+### Fixed
+
+- `hud.gd` node paths corrected (was referencing `HBox2` under `Info`, actual parent is `Info` directly)
+- `player.gd` now uses `bullet.set_damage()` method instead of direct property access
+
 ## [0.1.11] — 2026-10-25
 
 ### Changed

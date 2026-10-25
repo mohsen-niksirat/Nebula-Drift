@@ -40,6 +40,12 @@ func _register_placeholders() -> void:
 	_add("extra_hp", "Reinforced Hull",
 		"Hull integrity: +20 max HP.", Rarity.UNCOMMON, Color(1.0, 0.4, 0.4),
 		_apply_extra_hp)
+	_add("multi_shot", "Twin Cannons",
+		"Fire a second bullet with slight spread.", Rarity.RARE, Color(1.0, 0.7, 0.0),
+		_apply_multi_shot)
+	_add("bullet_damage", "Heavy Rounds",
+		"Bullets deal +1 damage.", Rarity.UNCOMMON, Color(0.8, 0.4, 1.0),
+		_apply_bullet_damage)
 
 # --- Apply hooks (one per placeholder upgrade) ---
 func _apply_extra_speed(rs) -> void:
@@ -51,6 +57,14 @@ func _apply_fire_rate(rs) -> void:
 func _apply_extra_hp(rs) -> void:
 	rs.max_hp += 20
 	rs.hp = min(rs.hp + 20, rs.max_hp)
+
+func _apply_multi_shot(rs) -> void:
+	# M1: extra bullet flag; player.gd reads this
+	rs.acquired_upgrades.append("multi_shot")
+
+func _apply_bullet_damage(rs) -> void:
+	# M1: damage flag; player.gd reads this
+	rs.acquired_upgrades.append("bullet_damage")
 
 func _add(id: String, def_name: String, desc: String, rarity: int, color: Color, fn: Callable) -> void:
 	var d = UpgradeDefinition.new()
@@ -76,3 +90,28 @@ func pick_random(rarity: int = -1) -> UpgradeDefinition:
 	var pool = get_all() if rarity < 0 else get_by_rarity(rarity)
 	assert(pool.size() > 0, "UpgradeRegistry: no definitions available to pick.")
 	return pool.pick_random()
+
+func pick_three() -> Array[UpgradeDefinition]:
+	# Weighted random: 50% common, 30% uncommon, 15% rare, 5% legendary
+	var pool: Array[UpgradeDefinition] = []
+	var weights = [0.5, 0.3, 0.15, 0.05]
+	for rarity in Rarity.values():
+		var options = get_by_rarity(rarity)
+		for def in options:
+			pool.append({"def": def, "weight": weights[rarity]})
+	var result: Array[UpgradeDefinition] = []
+	for i in 3:
+		if pool.is_empty():
+			break
+		var total = 0.0
+		for item in pool:
+			total += item.weight
+		var roll = randf() * total
+		var cumulative = 0.0
+		for item in pool:
+			cumulative += item.weight
+			if roll <= cumulative:
+				result.append(item.def)
+				pool.erase(item)
+				break
+	return result

@@ -8,10 +8,13 @@ const SceneFactory = preload("res://scripts/systems/scene_factory.gd")
 var _player: CharacterBody2D
 var _enemy: CharacterBody2D
 var _hud: CanvasLayer
+var _picker: CanvasLayer
 
 func _ready() -> void:
 	# Build all scenes in code — no .tscn files are loaded at all.
 	_build_scenes()
+	# M1: pause physics while in UPGRADE_PICK
+	get_tree().paused = false
 	# Connect state transitions BEFORE entering the first state.
 	GameManager.state_changed.connect(_on_state_changed)
 	EventBus.player_died.connect(_on_player_died)
@@ -22,14 +25,19 @@ func _ready() -> void:
 func _build_scenes() -> void:
 	_hud = SceneFactory.Hud.create()
 	add_child(_hud)
+	# M1: upgrade picker for level-up rewards
+	_picker = SceneFactory.UpgradePicker.create()
+	add_child(_picker)
 
 func _on_state_changed(new_state: GameManager.State, _old_state: GameManager.State) -> void:
 	match new_state:
 		GameManager.State.SECTOR:
+			get_tree().paused = false
 			_enter_sector()
 		GameManager.State.UPGRADE_PICK:
-			pass
+			get_tree().paused = true
 		GameManager.State.GAME_OVER:
+			get_tree().paused = true
 			_show_game_over()
 
 func _enter_sector() -> void:
@@ -51,7 +59,7 @@ func _spawn_player() -> void:
 	add_child(_player)
 
 func _spawn_enemy() -> void:
-	# Spawn position is derived from RunState.run_seed inside enemy_base.gd.
+	# M1: spawn 3 enemies on level start, then respawn on kill
 	_enemy = SceneFactory.Enemy.create()
 	add_child(_enemy)
 
