@@ -6,12 +6,12 @@ extends Node
 ## pool (Phase 0 requirement): bullets are acquired via spawn_bullet()
 ## and released back via release_bullet() — never queue_free()'d.
 ##
-## NOTE: the bullet scene is loaded lazily in _ready(), NOT via const
-## preload — a parse-time preload here would create a load cycle
-## (ObjectPool -> Bullet.tscn -> bullet.gd -> ObjectPool) that crashes
-## headless imports with a stack overflow.
+## NOTE: bullets are created programmatically in code (not via a PackedScene)
+## to avoid a Godot 4.4 savepack crash on Bullet.tscn's SubResource shape.
 
-var _bullet_scene: PackedScene
+const BULLET_SPEED := 420.0
+
+var _bullet_script: Script
 var _available: Array[Node2D] = []
 var _active: Array[Node2D] = []
 var _bullet_container: Node = null
@@ -20,12 +20,35 @@ signal spawned(instance: Node)
 signal returned(instance: Node)
 
 func _ready() -> void:
-	_bullet_scene = load("res://scenes/bullets/Bullet.tscn")
+	_bullet_script = load("res://scripts/entities/bullet.gd")
 	_bullet_container = Node2D.new()
 	_bullet_container.name = "BulletPool"
 	add_child(_bullet_container)
 
-func spawn_bullet(pos: Vector2, dir: Vector2, speed: float = 420.0) -> Node2D:
+func _create_bullet() -> Node2D:
+	var bullet := Area2D.new()
+	bullet.set_script(_bullet_script)
+	bullet.collision_layer = 1
+	bullet.collision_mask = 4
+	bullet.name = "Bullet"
+
+	var shape := CollisionShape2D.new()
+	var rect := RectangleShape2D.new()
+	rect.size = Vector2(12, 12)
+	shape.shape = rect
+	bullet.add_child(shape)
+
+	var sprite := ColorRect.new()
+	sprite.color = Color(0.973, 0.906, 0.2)
+	sprite.offset_left = -4.0
+	sprite.offset_top = -4.0
+	sprite.offset_right = 4.0
+	sprite.offset_bottom = 4.0
+	bullet.add_child(sprite)
+
+	return bullet
+
+func spawn_bullet(pos: Vector2, dir: Vector2, speed: float = BULLET_SPEED) -> Node2D:
 	var bullet: Node2D
 	if _available.size() > 0:
 		bullet = _available.pop_back()
@@ -33,7 +56,7 @@ func spawn_bullet(pos: Vector2, dir: Vector2, speed: float = 420.0) -> Node2D:
 		bullet.set_physics_process(true)
 		bullet.set_deferred("monitoring", true)
 	else:
-		bullet = _bullet_scene.instantiate()
+		bullet = _create_bullet()
 		_bullet_container.add_child(bullet)
 	bullet.global_position = pos
 	if bullet.has_method("launch"):
