@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3 uid="uid://bullet001"]
+
+[ext_resource type="Script" path="res://scripts/entities/bullet.gd" id="1_bullet"]
+
+[node name="Bullet" type="Area2D"]
+script = ExtResource("1_bullet")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+color = Color(0.973, 0.906, 0.2, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CollisionShape2DShape2D1")
+
+[sub_resource type="CircleShape2D" id="CollisionShape2DShape2D1"]
+radius = 6.0

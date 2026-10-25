@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3 uid="uid://player001"]
+
+[ext_resource type="Script" path="res://scripts/entities/player.gd" id="1_player"]
+
+[node name="Player" type="CharacterBody2D"]
+script = ExtResource("1_player")
+
+[node name="Sprite" type="Sprite2D" parent="."]
+color = Color(0.408, 0.804, 1, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CollisionShape2DShape2D1")
+
+[sub_resource type="CircleShape2D" id="CollisionShape2DShape2D1"]
+radius = 18.0

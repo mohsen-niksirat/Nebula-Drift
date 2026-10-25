@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://main001"]
+
+[ext_resource type="Script" path="res://scripts/main/main.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://player001" path="res://scenes/ship/Player.tscn" id="2_player"]
+[ext_resource type="PackedScene" uid="uid://enemy001" path="res://scenes/enemies/Enemy.tscn" id="3_enemy"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="Player" type="CharacterBody2D" parent="."]
+collision_layer = 2
+collision_mask = 1
+
+[node name="Enemy" type="Area2D" parent="."]
+collision_layer = 2
+collision_mask = 1
+
+[node name="HUD" type="CanvasLayer" parent="."]
+layer = 5

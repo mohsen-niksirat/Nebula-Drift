@@ -1,0 +1,27 @@
+# Godot
+project.godot
+*.import
+
+# OS-generated
+.user.project_metadata
+
+# Backup / scratch
+*.backup
+*.bak
+*.tmp
+
+# Editor autosaves (optional; keep or remove per preference)
+.autosave/
+
+# Any binary assets > 1 MB (upload to release/download instead)
+*.png
+*.jpg
+*.jpeg
+*.ogg
+*.mp3
+*.wav
+*.tscn.import
+*.scn.import
+
+# Compiled scripts
+*.bc
