@@ -2,20 +2,27 @@ extends CharacterBody2D
 ## Player — the player ship controller.
 ##
 ## Purpose: handle WASD/arrow movement and Space/mouse-click shooting.
-## Shoots toward the mouse cursor; bullets are spawned via the pooled
-## object (ObjectPool) required by Phase 0.
+## Shoots toward the mouse cursor; bullets are spawned via ObjectPool.
+## Registers in the "player" group so enemies can find it, and takes
+## contact damage via RunState.
+
+const CONTACT_INVULN_TIME = 0.6
 
 var _speed: float = 200.0
 var _fire_rate: float = 0.5
 var _cooldown: float = 0.0
+var _invuln: float = 0.0
 
 func _ready() -> void:
+	add_to_group("player")
 	_speed = RunState.movement_speed
 	_fire_rate = RunState.fire_rate
 
 func _physics_process(delta: float) -> void:
 	_handle_movement(delta)
 	_handle_shooting(delta)
+	if _invuln > 0.0:
+		_invuln -= delta
 
 func _handle_movement(delta: float) -> void:
 	var input_dir = Vector2.ZERO
@@ -37,7 +44,7 @@ func _handle_shooting(delta: float) -> void:
 		_fire()
 
 func _is_shooting() -> bool:
-	return Input.is_mouse_button_pressed(BUTTON_LEFT) or Input.is_key_pressed(KEY_SPACE)
+	return Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or Input.is_key_pressed(KEY_SPACE)
 
 func _fire() -> void:
 	# Aim toward mouse cursor.
@@ -50,3 +57,10 @@ func _fire() -> void:
 	ObjectPool.spawn_bullet(spawn_pos, dir)
 	EventBus.player_shoot.emit(spawn_pos, dir)
 	_cooldown = _fire_rate
+
+func take_damage(amount: int) -> void:
+	# Brief invulnerability window so one contact doesn't drain HP instantly.
+	if _invuln > 0.0:
+		return
+	_invuln = CONTACT_INVULN_TIME
+	RunState.take_damage(amount)

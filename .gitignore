@@ -1,27 +1,16 @@
+# Phase prompt files (working documents, not part of the game)
+nebula-drift-phase*.txt
+
 # Godot
-project.godot
+.godot/
 *.import
+export_presets.cfg
 
-# OS-generated
-.user.project_metadata
+# OS
+.DS_Store
+Thumbs.db
 
-# Backup / scratch
-*.backup
-*.bak
-*.tmp
-
-# Editor autosaves (optional; keep or remove per preference)
-.autosave/
-
-# Any binary assets > 1 MB (upload to release/download instead)
-*.png
-*.jpg
-*.jpeg
-*.ogg
-*.mp3
-*.wav
-*.tscn.import
-*.scn.import
-
-# Compiled scripts
-*.bc
+# Editors
+.idea/
+.vscode/
+*.swp

@@ -1,17 +1,19 @@
 extends CanvasLayer
-## HUD — display layer for HP, score, sector, and the game-over screen.
+## HUD — display layer for HP, score, and the game-over screen.
 ##
-## Purpose: Phase 0 HUD shows HP + score labels only, plus a restart
-## button that resets the run via RunState.reset() and returns to
-## the SECTOR state. No gameplay logic lives here.
+## Purpose: shows HP + score labels, plus a restart button that starts
+## a fresh run via GameManager.start_run(). Registered in the "hud"
+## group so main.gd can find it without hard-coding the scene path.
+## No gameplay logic lives here.
 
-@onready var _hp_label = $VP/HBox/VBox/Info/HBox2/HPLabel
-@onready var _score_label = $VP/HBox/VBox/Info/HBox2/ScoreLabel
-@onready var _game_over_panel = $VP/HBox/VBox/GameOver
-@onready var _final_score_label = $VP/HBox/VBox/GameOver/VBox2/FinalScore
-@onready var _restart_button = $VP/HBox/VBox/GameOver/VBox2/RestartButton
+@onready var _hp_label: Label = $Root/Info/HBox2/HPLabel
+@onready var _score_label: Label = $Root/Info/HBox2/ScoreLabel
+@onready var _game_over_panel: Control = $Root/GameOver
+@onready var _final_score_label: Label = $Root/GameOver/VBox2/FinalScore
+@onready var _restart_button: Button = $Root/GameOver/VBox2/RestartButton
 
 func _ready() -> void:
+	add_to_group("hud")
 	_game_over_panel.visible = false
 	_restart_button.pressed.connect(_on_restart_pressed)
 	EventBus.player_damaged.connect(_on_player_damaged)
@@ -19,14 +21,13 @@ func _ready() -> void:
 	_update_stats()
 
 func _on_restart_pressed() -> void:
-	# Reset the run and re-enter SECTOR (game over -> restart).
 	_game_over_panel.visible = false
-	GameManager.enter_state(GameManager.State.SECTOR)
+	GameManager.start_run()
 
-func _on_player_damaged(amount: int, hp: int) -> void:
+func _on_player_damaged(_amount: int, _hp: int) -> void:
 	_update_stats()
 
-func _on_enemy_died(enemy: Node) -> void:
+func _on_enemy_died(_enemy: Node) -> void:
 	_update_stats()
 
 func _update_stats() -> void:

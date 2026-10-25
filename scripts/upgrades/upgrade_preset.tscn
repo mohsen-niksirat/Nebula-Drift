@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://c8x9q2z7w3k4p"]
-
-[ext_resource type="Script" path="res://scripts/upgrades/upgrade_pick.gd" id="1_pick"]
-
-[node name="UpgradePick" type="Node2D"]
-script = ExtResource("1_pick")

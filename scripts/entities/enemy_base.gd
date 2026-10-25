@@ -1,4 +1,4 @@
-extends Area2D
+extends CharacterBody2D
 ## EnemyBase — extensible base class for future enemy types.
 ##
 ## Purpose: Phase 0 ships one placeholder enemy that drifts toward the
@@ -14,38 +14,43 @@ extends Area2D
 
 signal died(enemy: Node)
 
-const GROUPS = ["enemy"]
+const GROUP_NAME = "enemy"
 
 @export var max_hp: int = 3
 @export var drift_speed: float = 60.0
+@export var contact_damage: int = 10
 
 var _hp: int = 0
-var _seed: int
-var _rng: Rng
+var _player: Node2D = null
 
 func _ready() -> void:
-	add_to_group(GROUPS)
+	add_to_group(GROUP_NAME)
 	_hp = max_hp
-	# Seeded spawn behavior: drift toward a point computed from the
-	# run seed so identical runs produce identical enemy spawn positions.
-	_seed = RunState.seed
-	_rng = Rng.new(_seed)
-	_rng.randomize()
-	_drift_target = _calc_drift_target()
+	# Seeded spawn: the spawn position is computed from RunState.seed so
+	# identical runs produce identical enemy spawn positions.
+	global_position = _calc_spawn_position()
 
-func _calc_drift_target() -> Vector2:
-	# One placeholder enemy drifts in toward the player from above.
-	# Radius between 300 and 450 px, angle computed from seed.
-	var angle = _rng.randf_range(0.0, TAU)
-	var dist = _rng.randi_range(300, 450)
-	var origin = Vector2(0, -dist)
-	return origin.rotated(angle) + global_position
+func _calc_spawn_position() -> Vector2:
+	# Spawn on a circle around the arena center (radius 300-450 px).
+	# Angle + radius derive purely from the run seed -> deterministic.
+	var rng = Rng.new(RunState.seed)
+	var angle = rng.randf_range(0.0, TAU)
+	var dist = rng.randi_range(300, 450)
+	return Vector2(640, 360) + Vector2(0, -dist).rotated(angle)
 
 func _physics_process(delta: float) -> void:
-	# Drift toward the player.
-	var to_player = (global_position - get_global_mouse_position()).normalized()
-	velocity = to_player * drift_speed
+	# Drift toward the player (not the mouse).
+	_player = _find_player()
+	if _player != null and is_instance_valid(_player):
+		var dir = (_player.global_position - global_position).normalized()
+		velocity = dir * drift_speed
+	else:
+		velocity = Vector2.ZERO
 	move_and_slide()
+
+func _find_player() -> Node2D:
+	var nodes = get_tree().get_nodes_in_group("player")
+	return nodes[0] if nodes.size() > 0 else null
 
 func take_hit(damage: int) -> void:
 	_hp -= damage
@@ -60,3 +65,8 @@ func _die() -> void:
 
 func get_current_hp() -> int:
 	return _hp
+
+func _on_body_entered(body: Node) -> void:
+	# Contact damage: player touching the enemy loses HP.
+	if body.is_in_group("player") and body.has_method("take_damage"):
+		body.take_damage(contact_damage)
