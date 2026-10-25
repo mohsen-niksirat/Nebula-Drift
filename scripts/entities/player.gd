@@ -27,6 +27,9 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	_handle_movement(delta)
 	_handle_shooting(delta)
+	# Keep the player inside the visible 1280x720 arena.
+	global_position.x = clampf(global_position.x, 24.0, 1256.0)
+	global_position.y = clampf(global_position.y, 24.0, 696.0)
 	if _invuln > 0.0:
 		_invuln -= delta
 
