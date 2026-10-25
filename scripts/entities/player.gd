@@ -25,6 +25,10 @@ func _ready() -> void:
 	_bullet_damage = 2 if RunState.acquired_upgrades.has("bullet_damage") else 1
 
 func _physics_process(delta: float) -> void:
+	# Movement/shooting only runs during gameplay; do not process during pause.
+	if GameManager.current_state != GameManager.State.SECTOR:
+		velocity = Vector2.ZERO
+		return
 	_handle_movement(delta)
 	_handle_shooting(delta)
 	# Keep the player inside the visible 1280x720 arena.

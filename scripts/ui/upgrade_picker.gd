@@ -42,30 +42,56 @@ func _show_options() -> void:
 	# Make the overlay visible before pausing physics so the browser
 	# receives the input and can render the cards immediately.
 	_panel.visible = true
+	print("[UpgradePicker] panel visible: %s at position %s" % [_panel.visible, _panel.position])
 	GameManager.enter_state(GameManager.State.UPGRADE_PICK)
+	print("[UpgradePicker] state: %s, paused: %s" % [GameManager.State.keys()[GameManager.current_state], get_tree().paused])
 
 func _create_card(def, index: int) -> Button:
 	var btn := Button.new()
-	btn.custom_minimum_size = Vector2(200, 120)
-	btn.text = "%s\n%s" % [def.name, def.description]
+	btn.custom_minimum_size = Vector2(220, 140)
+	btn.text = "%s\n\n%s" % [def.name, def.description]
+	btn.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	btn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	btn.mouse_filter = Control.MOUSE_FILTER_STOP
 	# Color the button by rarity
 	var style := StyleBoxFlat.new()
-	style.bg_color = def.icon_color * 0.3
+	style.bg_color = Color(def.icon_color.r * 0.25, def.icon_color.g * 0.25, def.icon_color.b * 0.25, 0.9)
 	style.border_color = def.icon_color
-	style.border_width_left = 2
-	style.border_width_top = 2
-	style.border_width_right = 2
-	style.border_width_bottom = 2
+	style.border_width_left = 3
+	style.border_width_top = 3
+	style.border_width_right = 3
+	style.border_width_bottom = 3
+	style.corner_radius_top_left = 8
+	style.corner_radius_top_right = 8
+	style.corner_radius_bottom_right = 8
+	style.corner_radius_bottom_left = 8
 	btn.add_theme_stylebox_override("normal", style)
 	# Hover effect
 	var hover := StyleBoxFlat.new()
-	hover.bg_color = def.icon_color * 0.5
+	hover.bg_color = Color(def.icon_color.r * 0.45, def.icon_color.g * 0.45, def.icon_color.b * 0.45, 0.95)
 	hover.border_color = def.icon_color
-	hover.border_width_left = 2
-	hover.border_width_top = 2
-	hover.border_width_right = 2
-	hover.border_width_bottom = 2
+	hover.border_width_left = 3
+	hover.border_width_top = 3
+	hover.border_width_right = 3
+	hover.border_width_bottom = 3
+	hover.corner_radius_top_left = 8
+	hover.corner_radius_top_right = 8
+	hover.corner_radius_bottom_right = 8
+	hover.corner_radius_bottom_left = 8
 	btn.add_theme_stylebox_override("hover", hover)
+	# Pressed effect
+	var pressed := StyleBoxFlat.new()
+	pressed.bg_color = def.icon_color
+	pressed.border_color = Color.WHITE
+	pressed.border_width_left = 4
+	pressed.border_width_top = 4
+	pressed.border_width_right = 4
+	pressed.border_width_bottom = 4
+	pressed.corner_radius_top_left = 8
+	pressed.corner_radius_top_right = 8
+	pressed.corner_radius_bottom_right = 8
+	pressed.corner_radius_bottom_left = 8
+	btn.add_theme_stylebox_override("pressed", pressed)
 	btn.pressed.connect(_on_card_pressed.bind(index))
 	return btn
 
@@ -73,8 +99,10 @@ func _on_card_pressed(index: int) -> void:
 	if index >= _options.size():
 		return
 	var def = _options[index]
+	print("[UpgradePicker] picked: %s" % def.name)
 	def.apply_to(RunState)
 	EventBus.upgrade_picked.emit(def)
 	_panel.visible = false
 	_options.clear()
 	GameManager.enter_state(GameManager.State.SECTOR)
+	print("[UpgradePicker] resumed: state=%s, paused=%s" % [GameManager.State.keys()[GameManager.current_state], get_tree().paused])

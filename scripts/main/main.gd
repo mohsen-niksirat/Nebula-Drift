@@ -31,7 +31,6 @@ func _build_scenes() -> void:
 	add_child(_picker)
 	# UI is always processed so keyboard input remains available while the
 	# game tree is paused during upgrade selection.
-	_hud.process_mode = Node.PROCESS_MODE_ALWAYS
 
 func _on_state_changed(new_state: GameManager.State, _old_state: GameManager.State) -> void:
 	match new_state:

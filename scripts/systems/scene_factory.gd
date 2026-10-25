@@ -71,6 +71,7 @@ class Hud:
 		var hud := CanvasLayer.new()
 		hud.name = "HUD"
 		hud.layer = 5
+		hud.process_mode = Node.PROCESS_MODE_ALWAYS
 		hud.set_script(preload("res://scripts/ui/hud.gd"))
 
 		var root := Control.new()
@@ -162,10 +163,10 @@ class UpgradePicker:
 		var panel := PanelContainer.new()
 		panel.name = "Panel"
 		panel.set_anchors_preset(Control.PRESET_CENTER)
-		panel.size = Vector2(700, 240)
+		panel.size = Vector2(720, 280)
 		# Center the panel relative to the viewport. A positive position here
 		# would move it toward the bottom-right after center anchors are set.
-		panel.position = Vector2(-350, -120)
+		panel.position = Vector2(-360, -140)
 		picker.add_child(panel)
 
 		var vbox := VBoxContainer.new()

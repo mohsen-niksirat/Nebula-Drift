@@ -5,6 +5,23 @@ All notable changes to Nebula Drift will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4] — 2026-10-26
+
+### Fixed — Phase 1.1 Freeze Fix
+
+- **Upgrade picker visibility**: panel is correctly centered using anchor-relative negative offsets (`position = Vector2(-360, -140)` for a 720×280 panel at `PRESET_CENTER`)
+- **Process mode**: UpgradePicker and HUD now use `PROCESS_MODE_ALWAYS` in `SceneFactory.create()` so they remain interactive when `get_tree().paused = true`
+- **Upgrade picker diagnostics**: added `[UpgradePicker]` print statements in `_show_options()` and `_on_card_pressed()` to confirm panel visibility, state transitions, and resume behavior
+- **Card readability**: buttons now use larger size (`220×140`), `AUTOWRAP_WORD_SMART`, trimmed text, rounded corners (`corner_radius`), and distinct pressed/hover/normal styles
+- **Player state guard**: `_physics_process` explicitly skips movement and shooting when `GameManager.current_state != SECTOR`, ensuring clean pause behavior without phantom inputs
+
+### Technical details
+
+- No `.tscn` files were reintroduced; all UI remains code-generated
+- `Main.tscn` remains minimal (3 lines)
+- No typed references added that could recreate parse-time cycles
+- Player movement (`Input.get_vector`) and shooting (`Input.is_action_pressed("shoot")`) confirmed working via InputMap
+
 ## [0.2.3] — 2026-10-26
 
 ### Fixed
