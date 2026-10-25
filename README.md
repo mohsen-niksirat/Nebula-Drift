@@ -71,9 +71,7 @@ nebula-drift/
 │   │   └── rng.gd
 │   ├── upgrades/
 │   │   ├── upgrade_definition.gd
-│   │   ├── upgrade_registry.gd
-│   │   ├── upgrade_preset.tscn
-│   │   └── upgrade_pick.gd
+│   │   └── upgrade_registry.gd
 │   ├── entities/
 │   │   ├── player.gd
 │   │   ├── enemy_base.gd
@@ -86,7 +84,7 @@ nebula-drift/
 
 | Phase | Description                                   | Status   |
 |-------|-----------------------------------------------|----------|
-| P0    | Base architecture + smoke test                | ✅ done  |
+| P0    | Base architecture + smoke test                | ✅ done (code-complete; editor verification pending) |
 | M1    | Core movement / shooting / enemies            | ⬜ todo   |
 | M2    | Upgrade picks between sectors                 | ⬜ todo   |
 | M3    | Enemy variety + boss                          | ⬜ todo   |
@@ -94,12 +92,17 @@ nebula-drift/
 | M5    | Polish (audio, particles, screen shake)       | ⬜ todo   |
 | M6    | Synergies / shop / events                     | ⬜ todo   |
 
+> **Verification note:** the Phase 0/0.5/0.75 code has been repaired and
+> passes static inspection, but has **not** yet been run in the Godot
+> editor by the maintainers. The manual test checklist below is the gate
+> for marking P0 fully verified.
+
 ## Manual test checklist (after each phase)
 
 - [ ] Open project in Godot 4.x: no errors/warnings in Output.
 - [ ] Run: player moves, shoots, bullets pooled (no per-shot `instantiate`).
-- [ ] Kill enemy: score up; touch enemy: HP down; death → game-over screen.
-- [ ] Restart works; run state resets.
+- [ ] Kill enemy: score up; touch enemy: HP down (0.6s invulnerability window); death → game-over screen.
+- [ ] Restart works; run state resets (HP exactly 100/100 even after upgrades).
 - [ ] Fixed seed → identical enemy spawn positions across two runs.
 
 ## License

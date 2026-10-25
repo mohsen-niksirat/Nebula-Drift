@@ -26,6 +26,8 @@ var _player: Node2D = null
 func _ready() -> void:
 	add_to_group(GROUP_NAME)
 	_hp = max_hp
+	# Contact damage: the Hitbox Area2D detects the player body.
+	$Hitbox.body_entered.connect(_on_body_entered)
 	# Seeded spawn: the spawn position is computed from RunState.seed so
 	# identical runs produce identical enemy spawn positions.
 	global_position = _calc_spawn_position()

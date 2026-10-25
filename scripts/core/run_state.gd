@@ -14,6 +14,10 @@ var score: int = 0
 var sector_index: int = 0
 var acquired_upgrades: Array[String] = []
 
+const BASE_MAX_HP := 100
+const BASE_MOVE_SPEED := 200.0
+const BASE_FIRE_RATE := 0.5
+
 # Player runtime stats that upgrades modify (mirrors player.gd):
 var movement_speed: float = 200.0
 var fire_rate: float = 0.5
@@ -24,14 +28,16 @@ func _ready() -> void:
 
 # --- Run lifecycle ---
 func reset() -> void:
+	# Restore base stats BEFORE applying them to hp, so upgrades
+	# acquired in a previous run never leak into a fresh run.
+	max_hp = BASE_MAX_HP
+	movement_speed = BASE_MOVE_SPEED
+	fire_rate = BASE_FIRE_RATE
 	hp = max_hp
 	score = 0
 	sector_index = 0
 	acquired_upgrades.clear()
 	rng = Rng.new(seed)
-	# Base rates after reset so M2 upgrades can still scale them.
-	movement_speed = 200.0
-	fire_rate = 0.5
 
 func take_damage(amount: int) -> void:
 	hp = clamp(hp - amount, 0, max_hp)
