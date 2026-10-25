@@ -15,6 +15,8 @@ extends Node
 ##   sector_cleared()                    — all enemies defeated in sector
 ##   upgrade_picked(definition: UpgradeDefinition)
 
+const UpgradeDefinition = preload("res://scripts/upgrades/upgrade_definition.gd")
+
 signal enemy_spawned(enemy: Node)
 signal enemy_died(enemy: Node)
 signal bullet_hit(enemy: Node)

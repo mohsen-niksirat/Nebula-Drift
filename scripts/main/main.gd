@@ -5,6 +5,8 @@ extends Node2D
 ## connects EventBus signals, connects GameManager.state_changed, and
 ## drives the MENU -> SECTOR -> GAME_OVER -> SECTOR loop.
 
+const UpgradeDefinition = preload("res://scripts/upgrades/upgrade_definition.gd")
+
 const PLAYER_SCENE := preload("res://scenes/ship/Player.tscn")
 const ENEMY_SCENE := preload("res://scenes/enemies/Enemy.tscn")
 
@@ -47,7 +49,7 @@ func _spawn_player() -> void:
 	add_child(_player)
 
 func _spawn_enemy() -> void:
-	# Spawn position is derived from RunState.seed inside enemy_base.gd.
+	# Spawn position is derived from RunState.run_seed inside enemy_base.gd.
 	_enemy = ENEMY_SCENE.instantiate()
 	add_child(_enemy)
 

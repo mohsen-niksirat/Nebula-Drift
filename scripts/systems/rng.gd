@@ -14,11 +14,11 @@ extends RefCounted
 var _rng: RandomNumberGenerator
 var _seed: int
 
-func _init(seed: int = -1) -> void:
+func _init(seed_value: int = -1) -> void:
 	_rng = RandomNumberGenerator.new()
-	_seed = seed
-	if seed >= 0:
-		_rng.seed = seed
+	_seed = seed_value
+	if seed_value >= 0:
+		_rng.seed = seed_value
 
 ## Reset to the original constructor seed.
 func reset() -> void:

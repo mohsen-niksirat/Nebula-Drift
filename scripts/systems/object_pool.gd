@@ -30,6 +30,7 @@ func spawn_bullet(pos: Vector2, dir: Vector2, speed: float = 420.0) -> Node2D:
 		bullet = _available.pop_back()
 		bullet.visible = true
 		bullet.set_physics_process(true)
+		bullet.set_deferred("monitoring", true)
 	else:
 		bullet = BULLET_SCENE.instantiate()
 		_bullet_container.add_child(bullet)
@@ -47,6 +48,9 @@ func release_bullet(bullet: Node2D) -> void:
 		_active.erase(bullet)
 		bullet.visible = false
 		bullet.set_physics_process(false)
+		# Stop overlap detection while parked, otherwise an invisible
+		# bullet could still "hit" enemies that walk into it.
+		bullet.set_deferred("monitoring", false)
 		_available.append(bullet)
 		returned.emit(bullet)
 

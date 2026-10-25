@@ -12,6 +12,8 @@ extends Node
 ##     UpgradeRegistry.pick_random()
 ##     UpgradeRegistry.get_by_rarity(UpgradeRegistry.Rarity.COMMON)
 
+const UpgradeDefinition = preload("res://scripts/upgrades/upgrade_definition.gd")
+
 enum Rarity { COMMON = 0, UNCOMMON = 1, RARE = 2, LEGENDARY = 3 }
 
 var _registry: Dictionary = {}
@@ -31,15 +33,24 @@ func _ready() -> void:
 func _register_placeholders() -> void:
 	_add("extra_speed", "Overdrive Thrusters",
 		"Engine boost: +15% movement speed.", Rarity.COMMON, Color(0.3, 1.0, 0.5),
-		func(rs): rs.movement_speed *= 1.15)
+		_apply_extra_speed)
 	_add("fire_rate", "Rapid Firing",
 		"Weapons cycle faster: +20% fire rate.", Rarity.COMMON, Color(0.3, 0.9, 1.0),
-		func(rs): rs.fire_rate *= 0.8)
+		_apply_fire_rate)
 	_add("extra_hp", "Reinforced Hull",
 		"Hull integrity: +20 max HP.", Rarity.UNCOMMON, Color(1.0, 0.4, 0.4),
-		func(rs):
-			rs.max_hp += 20
-			rs.hp = min(rs.hp + 20, rs.max_hp))
+		_apply_extra_hp)
+
+# --- Apply hooks (one per placeholder upgrade) ---
+func _apply_extra_speed(rs) -> void:
+	rs.movement_speed *= 1.15
+
+func _apply_fire_rate(rs) -> void:
+	rs.fire_rate *= 0.8
+
+func _apply_extra_hp(rs) -> void:
+	rs.max_hp += 20
+	rs.hp = min(rs.hp + 20, rs.max_hp)
 
 func _add(id: String, def_name: String, desc: String, rarity: int, color: Color, fn: Callable) -> void:
 	var d = UpgradeDefinition.new()

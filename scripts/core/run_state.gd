@@ -6,8 +6,10 @@ extends Node
 ## Because it is an autoload, any system (player, enemy, HUD) can read
 ## or modify it, and GameManager resets it only on run START / restart.
 
+const Rng = preload("res://scripts/systems/rng.gd")
+
 var rng: Rng
-var seed: int = 1337
+var run_seed: int = 1337
 var hp: int = 100
 var max_hp: int = 100
 var score: int = 0
@@ -23,8 +25,8 @@ var movement_speed: float = 200.0
 var fire_rate: float = 0.5
 
 func _ready() -> void:
-	rng = Rng.new(seed)
-	print("[RunState] run seed =", seed)
+	rng = Rng.new(run_seed)
+	print("[RunState] run seed =", run_seed)
 
 # --- Run lifecycle ---
 func reset() -> void:
@@ -37,7 +39,7 @@ func reset() -> void:
 	score = 0
 	sector_index = 0
 	acquired_upgrades.clear()
-	rng = Rng.new(seed)
+	rng = Rng.new(run_seed)
 
 func take_damage(amount: int) -> void:
 	hp = clamp(hp - amount, 0, max_hp)

@@ -5,6 +5,34 @@ All notable changes to Nebula Drift will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] — 2026-10-25
+
+### Fixed
+
+- **CI cold-start parse errors** (first `--headless --import` run failed
+  with parse errors + a signal-11 crash):
+  - Root cause: scripts referenced `Rng` / `UpgradeDefinition` as global
+    class names, but on a fresh checkout the global class cache
+    (`.godot/global_script_class_cache.cfg`) does not exist yet when
+    autoload scripts are parsed — global `class_name` types do not
+    resolve, while autoload names do (they come from ProjectSettings).
+  - Fix: removed `class_name` declarations and switched every consumer
+    to explicit `const X = preload(...)` references (run_state.gd,
+    enemy_base.gd, upgrade_registry.gd, event_bus.gd, main.gd). Parse
+    order is now deterministic with no scan dependency.
+  - `export_presets.cfg`: added the required `runnable=true` (and
+    `dedicated_server=false`) keys — Godot errored on the missing
+    `preset.0/runnable` key.
+  - `upgrade_registry.gd`: replaced multi-line lambdas in call
+    arguments with named `_apply_*` methods (removes a parser
+    edge case).
+  - `run_state.gd`: renamed `seed` -> `run_seed` (and `Rng._init`'s
+    parameter to `seed_value`) to avoid shadowing the built-in global
+    `seed()` / `randomize()` identifiers.
+  - `object_pool.gd`: released bullets now disable `monitoring`
+    (deferred) so parked invisible bullets cannot register hits;
+    re-enabled on spawn.
+
 ## [0.1.3] — 2026-10-25
 
 ### Added

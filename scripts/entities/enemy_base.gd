@@ -15,6 +15,7 @@ extends CharacterBody2D
 signal died(enemy: Node)
 
 const GROUP_NAME = "enemy"
+const Rng = preload("res://scripts/systems/rng.gd")
 
 @export var max_hp: int = 3
 @export var drift_speed: float = 60.0
@@ -28,14 +29,14 @@ func _ready() -> void:
 	_hp = max_hp
 	# Contact damage: the Hitbox Area2D detects the player body.
 	$Hitbox.body_entered.connect(_on_body_entered)
-	# Seeded spawn: the spawn position is computed from RunState.seed so
+	# Seeded spawn: the spawn position is computed from RunState.run_seed so
 	# identical runs produce identical enemy spawn positions.
 	global_position = _calc_spawn_position()
 
 func _calc_spawn_position() -> Vector2:
 	# Spawn on a circle around the arena center (radius 300-450 px).
 	# Angle + radius derive purely from the run seed -> deterministic.
-	var rng = Rng.new(RunState.seed)
+	var rng = Rng.new(RunState.run_seed)
 	var angle = rng.randf_range(0.0, TAU)
 	var dist = rng.randi_range(300, 450)
 	return Vector2(640, 360) + Vector2(0, -dist).rotated(angle)
