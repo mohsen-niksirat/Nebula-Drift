@@ -3,6 +3,9 @@ name: Deploy to GitHub Pages
 # Builds the Godot Web export and deploys it to GitHub Pages on every
 # push to main. Requires a one-time manual setting:
 #   Repo Settings -> Pages -> Source = "GitHub Actions"
+#
+# While the import crash is unresolved, a bisect step runs first and
+# prints per-test PASS/FAIL results to the log (informational).
 
 on:
   push:
@@ -32,7 +35,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download Godot headless binary
+      - name: Install Godot headless binary
         run: |
           wget -q "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
           unzip -q "Godot_v${GODOT_VERSION}_linux.x86_64.zip"
@@ -47,15 +50,91 @@ jobs:
           mv templates/* "${TEMPLATES_DIR}/4.3.stable/"
           ls "${TEMPLATES_DIR}/4.3.stable" | head -5
 
+      - name: Bisect the import crash (informational, never fails the job)
+        run: |
+          mkdir -p /tmp/diag
+          run_import() {
+            local label="$1"; shift
+            rm -rf .godot
+            if godot --headless "$@" > /tmp/diag/out.txt 2>&1; then
+              echo "=== [$label] PASS ==="
+            else
+              echo "=== [$label] FAIL (exit $?) ==="
+              tail -15 /tmp/diag/out.txt || true
+            fi
+          }
+
+          echo "##### TEST 1: minimal project.godot (environmental check)"
+          cp project.godot /tmp/diag/project.godot.bak
+          printf 'config_version=5\n\n[application]\n\nconfig/name="diag"\n' > project.godot
+          run_import "minimal-project" --import
+          cp /tmp/diag/project.godot.bak project.godot
+
+          echo "##### TEST 2: minimal project + icon.svg (SVG importer isolated)"
+          printf 'config_version=5\n\n[application]\n\nconfig/name="diag"\nconfig/icon="res://icon.svg"\n' > project.godot
+          run_import "minimal+icon" --import
+          cp /tmp/diag/project.godot.bak project.godot
+
+          echo "##### TEST 3: full import, verbose (last ops before crash)"
+          run_import "full-verbose" --import --verbose
+
+          echo "##### TEST 4: import without icon.svg"
+          mv icon.svg /tmp/diag/icon.svg.bak
+          run_import "no-icon" --import
+          mv /tmp/diag/icon.svg.bak icon.svg
+
+          echo "##### TEST 5: import without export_presets.cfg"
+          mv export_presets.cfg /tmp/diag/presets.bak
+          run_import "no-presets" --import
+          mv /tmp/diag/presets.bak export_presets.cfg
+
+          echo "##### TEST 6: import without autoloads"
+          cp project.godot /tmp/diag/pg.bak
+          python3 - <<'PYEOF'
+          lines = open('project.godot').read().splitlines(keepends=True)
+          out, skip = [], False
+          for ln in lines:
+              if ln.startswith('[autoload]'):
+                  skip = True
+                  continue
+              if skip and ln.startswith('['):
+                  skip = False
+              if not skip:
+                  out.append(ln)
+          open('project.godot', 'w').write(''.join(out))
+          PYEOF
+          run_import "no-autoloads" --import
+          cp /tmp/diag/pg.bak project.godot
+
+          echo "##### TEST 7: import without scenes/"
+          mv scenes /tmp/diag/scenes.bak
+          run_import "no-scenes" --import
+          mv /tmp/diag/scenes.bak scenes
+
+          echo "##### TEST 8: alternative command --editor --quit"
+          run_import "editor-quit" --editor --quit
+
+          echo "##### TEST 9: Godot 4.4 differential"
+          if wget -q "https://github.com/godotengine/godot-builds/releases/download/4.4-stable/Godot_v4.4-stable_linux.x86_64.zip"; then
+            unzip -q "Godot_v4.4-stable_linux.x86_64.zip"
+            rm -rf .godot
+            if ./Godot_v4.4-stable_linux.x86_64 --headless --import > /tmp/diag/out44.txt 2>&1; then
+              echo "=== [godot-4.4] PASS ==="
+            else
+              echo "=== [godot-4.4] FAIL ==="
+              tail -15 /tmp/diag/out44.txt || true
+            fi
+          else
+            echo "=== [godot-4.4] download failed, skipped ==="
+          fi
+
+          echo "##### BISECTION COMPLETE (results above)"
+
       - name: Import project assets (generates .godot cache)
         run: |
-          # A cold checkout has no .godot/ cache; the very first import
-          # can abort on load-order edge cases. Retry once — the retry
-          # still fails the job if the import is genuinely broken.
-          godot --headless --import || {
-            echo "::warning::first --import attempt failed, retrying"
-            godot --headless --import
-          }
+          rm -rf .godot
+          godot --headless --import
+        # Non-zero exit on failure aborts the job automatically.
 
       - name: Export Web release
         run: godot --headless --export-release "Web" build/web/index.html
