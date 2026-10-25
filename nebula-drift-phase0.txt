@@ -1,0 +1,128 @@
+================================================================
+PROJECT: NEBULA DRIFT — Space Shooter Roguelite (Godot 4)
+PHASE 0 PROMPT — Build the Agent Base (project skeleton + architecture)
+================================================================
+
+## CONTEXT (read carefully — you are a stateless agent)
+
+You are building "Nebula Drift", a 2D space-shooter roguelite in
+Godot 4.x (GDScript). This is PHASE 0 of a multi-phase build. Only
+the project base/architecture is expected — NO full gameplay yet.
+
+The user will push this to GitHub and play/test between phases.
+Future phases (do NOT implement now, but architecture must allow):
+M1 core movement/shooting/enemies, M2 upgrade picks between sectors,
+M3 enemy variety + boss, M4 meta-progression currency, M5 polish
+(audio, particles, screen shake), M6 synergies/shop/events.
+
+## STANDING RULES (apply to every commit, every phase)
+
+- Godot 4.x, GDScript only (no C#, no plugins requiring editor assets).
+- Single branch: `main`. Clean, atomic commits with clear messages.
+  No merge commits, no leftover scratch/backup files, no TODO debris.
+- No binary assets larger than ~1 MB in repo. Placeholder art must be
+  procedurally drawn or tiny (neon-vector style, generated via _draw()
+  or simple ColorRect/Line2D — no asset downloads).
+- Every script has a short header comment describing its purpose.
+- Project must open and run in Godot 4.x with ZERO errors/warnings
+  in the Output panel.
+- Follow Godot naming conventions: PascalCase files for classes,
+  snake_case for signals/functions, resources in `res://` subfolders.
+- Write English code comments; README in English.
+
+## REQUIRED REPO STRUCTURE
+
+nebula-drift/
+├── project.godot
+├── README.md                  (game pitch, how to run, phase status table)
+├── CHANGELOG.md               (one entry per phase)
+├── docs/
+│   ├── STORY.md               (the narrative scenario — see below)
+│   └── ARCHITECTURE.md        (data-flow diagram of the systems below)
+├── scenes/
+│   ├── main/Main.tscn         (entry: boots GameManager)
+│   ├── ship/Player.tscn       (placeholder: moves with WASD/arrows)
+│   ├── enemies/Enemy.tscn     (placeholder: drifts toward player)
+│   ├── bullets/Bullet.tscn
+│   └── ui/HUD.tscn            (HP + score labels only)
+├── scripts/
+│   ├── core/
+│   │   ├── game_manager.gd    (autoload: top-level state machine:
+│   │   │                       MENU / SECTOR / UPGRADE_PICK / GAME_OVER)
+│   │   ├── run_state.gd       (autoload: current run data — HP, score,
+│   │   │                       sector index, acquired upgrades)
+│   │   └── event_bus.gd       (autoload: all global signals, e.g.
+│   │                           enemy_died, player_damaged, sector_cleared)
+│   ├── systems/
+│   │   ├── object_pool.gd     (generic pooled-spawner for bullets/effects;
+│   │   │                       MUST be used by Bullet spawning)
+│   │   └── rng.gd             (seeded RNG wrapper — run-seed ready)
+│   ├── upgrades/
+│   │   ├── upgrade_definition.gd  (Resource: id, name, icon-color,
+│   │   │                           rarity, apply(run_state) logic hook)
+│   │   └── upgrade_registry.gd    (autoload: loads/holds all upgrade defs;
+│   │       │                       ships with 3 placeholder upgrades)
+│   └── entities/
+│       ├── player.gd
+│       ├── enemy_base.gd      (extensible class for future enemy types)
+│       └── bullet.gd
+└── assets/                    (empty for now, .gitkeep)
+
+## PHASE 0 DELIVERABLES (this phase's scope)
+
+1. The full repo structure above, all scripts valid GDScript 4.
+2. MINIMAL playable proof-of-architecture scene:
+   - Player moves (WASD/arrows), shoots toward mouse with Space/click.
+   - Bullets come ONLY from ObjectPool. One placeholder enemy drifts
+     in, dies to 3 hits (via event_bus signal), player HP drops on
+     contact. Score increments. On player death → GAME_OVER state
+     with a restart button (run resets via run_state.reset()).
+   - This is a smoke test of the systems, not gameplay polish.
+3. Seeded RNG wired into run_state (any seed works; a fixed seed
+   must produce identical enemy spawn positions — test it).
+4. Upgrade system skeleton: 3 placeholder upgrade Resources (e.g.
+   +move speed, +fire rate, +max HP) registered; picking is NOT
+   wired into gameplay flow yet — just prove the registry loads them.
+5. docs/STORY.md containing the scenario text below, and
+   docs/ARCHITECTURE.md explaining each system and signal flow.
+6. README phase-status table with Phase 0 checked.
+7. CHANGELOG.md entry "v0.1.0 — Phase 0: base architecture".
+
+## SCENARIO (copy into docs/STORY.md verbatim)
+
+NEBULA DRIFT — Story
+
+The nebula was once the galaxy's busiest trade corridor. Two
+centuries ago an event called the Drift tore it apart: space itself
+began folding, spitting out rogue drones, derelict fleets, and
+things no one has a name for. Every ship that enters is lost.
+
+You pilot the Kestrel-9, an experimental scout with a prototype
+"Echo Drive" — the only engine that can hold a course through the
+folding. Your mission: cross the Nebula's nine sectors and reach
+the Beacon, a distress array still transmitting from the far side.
+
+Death is not the end. The Echo Drive remembers: every run, a fragment
+of your ship's pattern survives back at the last station. The station
+engineers fuse those fragments into permanent hull refits and weapon
+blueprints (meta-progression). The Nebula changes every time (procedural
+sectors), and so do the salvage offers between sectors (upgrade picks).
+
+Tone: lonely neon space, mystery — what is the Beacon? Why does the
+Nebula resist you more the closer you get? Final-sector enemies
+flicker like they're... remembering previous runs too.
+
+## MANUAL TEST CHECKLIST (user does after each phase)
+
+- Open project in Godot 4.x: no errors/warnings.
+- Run: player moves, shoots, bullets pooled (no per-shot instantiate).
+- Kill enemy: score up; touch enemy: HP down; death → game over screen.
+- Restart works, run state resets.
+- Fixed seed → identical enemy spawn positions across two runs.
+
+## FINISH
+
+STOP after Phase 0. Summarize what was built (files, systems, any
+deviations from this spec), and wait for the user's confirmation
+before anything else. Do NOT start M1 gameplay.
+================================================================

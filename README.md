@@ -18,7 +18,7 @@ for. You carry the only engine that can hold a course through the folding.
 
 ## How to run
 
-Requirements: **Godot 4.3 or newer** (GDScript only, no C#, no editor plugins).
+Requirements: **Godot 4.4 or newer** (GDScript only, no C#, no editor plugins).
 
 1. Clone / download this repository.
 2. Open `project.godot` in Godot.
@@ -43,7 +43,7 @@ After the CI workflow succeeds, the game is playable at:
 ### CI
 
 Every push to `main` triggers [.github/workflows/deploy.yml](.github/workflows/deploy.yml):
-it downloads Godot **4.3-stable** headless, installs the matching export
+it downloads Godot **4.4-stable** headless, installs the matching export
 templates, runs `--import` then `--export-release "Web"`, and deploys
 `build/web/` to GitHub Pages. If the export fails, the deploy is blocked.
 

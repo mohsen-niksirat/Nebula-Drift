@@ -5,6 +5,25 @@ All notable changes to Nebula Drift will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.8] — 2026-10-25
+
+### Fixed
+
+- **Root cause of `godot --headless --import` SIGSEGV on cold checkout**: `Main.tscn` declared external PackedScene resources (`Player.tscn`, `Enemy.tscn`, `HUD.tscn`). When the editor loaded the main scene during `--import`, `load()` resolved those resources synchronously. Their scripts reference autoloads (e.g., `RunState.hp`, `ObjectPool.spawn_bullet`), which re-entered the still-loading autoload script files — infinite recursion → stack overflow → crash.
+- Fix: `Main.tscn` now only contains the root node; `main.gd` lazily `load()`s `Player.tscn`, `Enemy.tscn`, and `HUD.tscn` inside `_ready()` (after all autoloads are initialized), eliminating the parse-time cycle entirely.
+
+## [0.1.7] — 2026-10-25
+
+### Fixed
+
+- Corrected HUD script node paths: the labels are children of `Root/Info` (not a missing `HBox2` node), and game-over controls are under `Root/GameOver/Panel/VBox2`. This mismatch caused scene instantiation to fail.
+
+## [0.1.6] — 2026-10-25
+
+### Changed
+
+- Pinned the GitHub Pages workflow and project feature metadata to **Godot 4.4-stable** after the Godot 4.3 headless import crash remained reproducible on a cold checkout. The 4.4 CI run still requires verification before deployment can be considered complete.
+
 ## [0.1.5] — 2026-10-25
 
 ### Fixed

@@ -6,11 +6,11 @@ extends CanvasLayer
 ## group so main.gd can find it without hard-coding the scene path.
 ## No gameplay logic lives here.
 
-@onready var _hp_label: Label = $Root/Info/HBox2/HPLabel
-@onready var _score_label: Label = $Root/Info/HBox2/ScoreLabel
+@onready var _hp_label: Label = $Root/Info/HPLabel
+@onready var _score_label: Label = $Root/Info/ScoreLabel
 @onready var _game_over_panel: Control = $Root/GameOver
-@onready var _final_score_label: Label = $Root/GameOver/VBox2/FinalScore
-@onready var _restart_button: Button = $Root/GameOver/VBox2/RestartButton
+@onready var _final_score_label: Label = $Root/GameOver/Panel/VBox2/FinalScore
+@onready var _restart_button: Button = $Root/GameOver/Panel/VBox2/RestartButton
 
 func _ready() -> void:
 	add_to_group("hud")

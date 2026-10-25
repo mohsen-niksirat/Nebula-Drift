@@ -1,0 +1,133 @@
+================================================================
+PROJECT: NEBULA DRIFT — Godot 4.x space shooter roguelite
+PHASE 0.5 PROMPT — REPAIR PASS: make the Phase 0 base actually run
+================================================================
+
+## CONTEXT (stateless agent — read fully)
+
+A previous agent built the Phase 0 skeleton of this repo. The file
+STRUCTURE is correct and must NOT be restructured. However the phase
+was closed as "done" while the project CANNOT RUN. Your job in this
+phase is repair only: fix the defects below, verify in Godot, and
+commit. Do NOT add new features. Do NOT redesign the architecture.
+
+Existing autoloads that MUST be registered in project.godot
+(create project.godot if missing):
+  GameManager -> res://scripts/core/game_manager.gd
+  RunState     -> res://scripts/core/run_state.gd
+  EventBus     -> res://scripts/core/event_bus.gd
+  ObjectPool   -> res://scripts/systems/object_pool.gd
+  UpgradeRegistry -> res://scripts/upgrades/upgrade_registry.gd
+Set the main scene to res://scenes/main/Main.tscn.
+
+## STANDING RULES (unchanged)
+
+- Godot 4.x, GDScript only. Single branch `main`, clean atomic commits.
+- No scratch/backup files in the repo (see defect #2).
+- Project must open and run in Godot 4.x with ZERO errors AND zero
+  script parse errors in the Output panel. This is the gate.
+
+## DEFECTS TO FIX (verified by code inspection of the current main)
+
+1. MISSING project.godot — repo is not a Godot project at all.
+   Create it with correct config_version, autoloads above, main scene,
+   and window size 1280x720.
+
+2. nebula-drift-phase0.txt is committed at repo root. Delete it
+   (git rm) and add it to .gitignore.
+
+3. scripts/systems/rng.gd — BROKEN:
+   - `func pick<T>(...)` and `func shuffle<T>(...)` are invalid GDScript
+     (Godot has no generic function syntax). Replace with plain
+     untyped Array-based functions.
+   - `reset()` references an undeclared variable `seed`; store the
+     constructor seed in a var and restore it.
+   - `_init` calls `_rng.randomize()` right after setting the seed,
+     destroying determinism. Remove that call: a fixed seed must yield
+     identical sequences.
+
+4. scripts/entities/enemy_base.gd — BROKEN:
+   - extends Area2D but calls `move_and_slide()` and sets `velocity`
+     (neither exists on Area2D). Either extend CharacterBody2D or move
+     with `position += dir * speed * delta`.
+   - `_physics_process` drifts toward `get_global_mouse_position()`
+     instead of the player. It must chase the player node.
+   - `_drift_target` is assigned but never declared; declare it or
+     remove the dead code.
+   - `_rng.randomize()` after seeding — remove; spawn placement must
+     derive purely from RunState.seed so a fixed seed reproduces the
+     same spawn position across runs.
+
+5. scripts/systems/object_pool.gd — BROKEN:
+   - In `spawn()`, the `_available.size() > 0` reuse path pops an
+     instance and calls activate(), then references `node` which is
+     not defined in that branch (runtime error). Fetch the node from
+     the instance and return it consistently.
+   - `return_to_pool` iterates `for i in _active.size() - 1` (skips the
+     last element). Iterate the full array safely.
+   - The inner class `Instance` defines `_ready()` but instances are
+     RefCounted and never in the tree — that code never runs. Move any
+     needed init into explicit methods or the constructor.
+   - `func free()` shadows Object.free() — rename (e.g. `release()`).
+   - NOTE: scripts reference `ObjectPool.spawn_bullet(pos, dir)` —
+     provide that convenience method on the ObjectPool autoload
+     (it currently does not exist) and make bullet spawning go through
+     it. Bullets must never be queue_free()'d on despawn if a pool is
+     claimed — release back to the pool.
+
+6. scripts/upgrades/upgrade_registry.gd — BROKEN:
+   - `def.apply = func(...)` assigns to a method name — illegal in
+     GDScript. Either declare `var apply: Callable` in
+     UpgradeDefinition (rename the method, e.g. keep a helper
+     `apply_to(run_state)` that the Callable can be stored in), or
+     implement apply() inside UpgradeDefinition subclasses/one match
+     statement keyed by id. Pick the simplest correct design; keep
+     the registry API (get_all / pick(rng) / get_by_rarity) working.
+
+7. scripts/entities/bullet.gd — on hit it calls `queue_free()`;
+   with a pool in place it must instead notify the pool to release it
+   (or at minimum be consistent with the ObjectPool convenience
+   method). Also verify the Area2D collision signal is actually
+   connected in Bullet.tscn (`_on_body_entered` must fire).
+
+8. scripts/main/main.gd:
+   - Calls `HUD.show_game_over()` as if HUD were an autoload. It is a
+     scene CanvasLayer. Get the node properly (e.g. via group lookup
+     or a direct reference) and show the game-over panel.
+   - `_on_state_changed` is defined but never connected to
+     GameManager.state_changed — connect it in _ready().
+   - `GameManager.enter_state(State.MENU)` then `_setup_test_scene()`
+     runs for MENU: the flow must be MENU -> (start button or auto)
+     -> SECTOR, and on player_died -> GAME_OVER with the restart
+     button returning to SECTOR. Verify the full loop actually works.
+
+9. scripts/core/game_manager.gd — `_on_sector()` calls RunState.reset()
+   on every SECTOR entry, which also resets HP mid-run if SECTOR is
+   re-entered. Reset only on run START and restart, not on every
+   transition into SECTOR.
+
+10. README claims "verified by the Phase 0 test in the editor" — it
+    was not. After your repairs, actually verify: run the project,
+    complete one kill + one death + one restart, and only then update
+    docs honestly. Never claim verification that didn't happen.
+
+## ACCEPTANCE GATE (all must pass)
+
+- Project opens in Godot 4.x with zero parse errors / zero errors.
+- Player moves (WASD), shoots toward mouse; bullets come from the pool
+  and are released back (no per-shot instantiate/queue_free).
+- Enemy drifts toward the PLAYER (not the mouse), dies in 3 hits,
+  score increments, player HP drops on contact.
+- Player death -> GAME_OVER panel with final score -> Restart ->
+  fresh run (HP full, score 0, upgrades cleared).
+- Fixed seed (e.g. 1337): two consecutive runs produce the IDENTICAL
+  enemy spawn position. State this explicitly and honestly in the
+  summary only if you observed it.
+
+## FINISH
+
+STOP after this repair phase. Summarize: each defect -> what you
+changed, any defect you could NOT reproduce, and the exact Godot
+version you verified with. Wait for user confirmation. Do NOT start
+M1 gameplay.
+================================================================
