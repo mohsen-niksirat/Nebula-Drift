@@ -5,6 +5,14 @@ All notable changes to Nebula Drift will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.11] — 2026-10-25
+
+### Changed
+
+- **All scenes converted to code-only instantiation**: `SceneFactory` builds Player, Enemy, and HUD via `Area2D.new()`, `CharacterBody2D.new()`, `CanvasLayer.new()` — no `.tscn` files remain except the minimal `Main.tscn` entry point. This eliminates the Godot 4.4 savepack serializer crash entirely.
+- `Bullet.tscn` was already removed in 0.1.10; bullets are created in `ObjectPool._create_bullet()`.
+- Only `Main.tscn` (3 lines, no SubResources) is exported — it cannot trigger the serializer bug.
+
 ## [0.1.10] — 2026-10-25
 
 ### Fixed

@@ -1,22 +1,17 @@
 extends Node2D
 ## Main — entry point that boots the GameManager and wires Phase 0 systems.
-## Scene loads are deferred until all autoload scripts are initialized
-## to prevent a cold-start circular dependency crash (see CHANGELOG).
+## All scenes are created programmatically via SceneFactory to bypass
+## Godot 4.4 savepack crashes on .tscn files with SubResources.
 
-const PLAYER_SCENE_PATH := "res://scenes/ship/Player.tscn"
-const ENEMY_SCENE_PATH := "res://scenes/enemies/Enemy.tscn"
-const HUD_SCENE_PATH := "res://scenes/ui/HUD.tscn"
+const SceneFactory = preload("res://scripts/systems/scene_factory.gd")
 
-var _player_scene: PackedScene
-var _enemy_scene: PackedScene
-var _hud_scene: PackedScene
 var _player: CharacterBody2D
 var _enemy: CharacterBody2D
 var _hud: CanvasLayer
 
 func _ready() -> void:
-	# Load scenes lazily to avoid circular dependencies during autoload parse.
-	_load_scenes()
+	# Build all scenes in code — no .tscn files are loaded at all.
+	_build_scenes()
 	# Connect state transitions BEFORE entering the first state.
 	GameManager.state_changed.connect(_on_state_changed)
 	EventBus.player_died.connect(_on_player_died)
@@ -24,15 +19,9 @@ func _ready() -> void:
 	# Boot flow: MENU -> auto-start SECTOR (no title screen in Phase 0).
 	GameManager.start_run()
 
-func _load_scenes() -> void:
-	_player_scene = load(PLAYER_SCENE_PATH)
-	_enemy_scene = load(ENEMY_SCENE_PATH)
-	_hud_scene = load(HUD_SCENE_PATH)
-	if _hud_scene != null:
-		_hud = _hud_scene.instantiate()
-		add_child(_hud)
-	else:
-		push_error("Failed to load HUD scene")
+func _build_scenes() -> void:
+	_hud = SceneFactory.Hud.create()
+	add_child(_hud)
 
 func _on_state_changed(new_state: GameManager.State, _old_state: GameManager.State) -> void:
 	match new_state:
@@ -57,13 +46,13 @@ func _clear_actors() -> void:
 	ObjectPool.release_all()
 
 func _spawn_player() -> void:
-	_player = _player_scene.instantiate()
+	_player = SceneFactory.Player.create()
 	_player.position = Vector2(640, 360)
 	add_child(_player)
 
 func _spawn_enemy() -> void:
 	# Spawn position is derived from RunState.run_seed inside enemy_base.gd.
-	_enemy = _enemy_scene.instantiate()
+	_enemy = SceneFactory.Enemy.create()
 	add_child(_enemy)
 
 func _show_game_over() -> void:
